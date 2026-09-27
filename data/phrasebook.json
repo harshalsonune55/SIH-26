@@ -1,0 +1,18 @@
+{
+  "name": "VoiceMate classroom demo phrasebook",
+  "version": "1.0.0",
+  "license": "Prototype data — validate with native Santhali educators before real classroom use",
+  "notes": "Small manually assembled demonstration set. This is not a machine-learning training corpus.",
+  "phrases": [
+    {"hindi":"आज हम जोड़ सीखेंगे।","keywords":["जोड़","सीखेंगे"],"olChiki":"ᱛᱮᱦᱮᱧ ᱟᱵᱚ ᱥᱮᱞᱮᱫ ᱵᱚ ᱥᱮᱪᱮᱫᱟ।","roman":"Tehen abo seled bo secheda."},
+    {"hindi":"तीन आम और दो आम मिलाकर कितने आम होंगे?","keywords":["तीन आम","दो आम"],"olChiki":"ᱯᱮ ᱟᱢ ᱟᱨ ᱵᱟᱨ ᱟᱢ ᱥᱮᱞᱮᱫ ᱠᱟᱛᱮ ᱛᱤᱱᱟᱹᱠ ᱟᱢ ᱦᱩᱭᱩᱜᱼᱟ?","roman":"Pe am ar bar am selet kate tinak am huyuk'a?"},
+    {"hindi":"क्या आप समझ गए?","keywords":["समझ","समझ गए"],"olChiki":"ᱪᱮᱫ ᱟᱢ ᱵᱩᱡᱷᱟᱹᱣ ᱠᱮᱫᱟ?","roman":"Ched am bujhau keda?"},
+    {"hindi":"उत्तर बोलकर बताओ।","keywords":["उत्तर","बोलकर"],"olChiki":"ᱨᱚᱲ ᱠᱟᱛᱮ ᱛᱮᱞᱟ ᱢᱮ।","roman":"Roṛ kate tela me."},
+    {"hindi":"नमस्ते बच्चों।","keywords":["नमस्ते","बच्चों"],"olChiki":"ᱡᱚᱦᱟᱨ ᱜᱤᱫᱨᱟᱹ ᱠᱚ।","roman":"Johar gidra ko."},
+    {"hindi":"अपनी किताब खोलो।","keywords":["किताब","खोलो"],"olChiki":"ᱟᱢᱟᱜ ᱯᱩᱛᱷᱤ ᱡᱷᱤᱡ ᱢᱮ।","roman":"Amag puthi jhij me."},
+    {"hindi":"यह एक पेड़ है।","keywords":["पेड़"],"olChiki":"ᱱᱚᱶᱟ ᱫᱚ ᱢᱤᱫ ᱫᱟᱨᱮ ᱠᱟᱱᱟ।","roman":"Nowa do mit dare kana."},
+    {"hindi":"बहुत अच्छा।","keywords":["बहुत अच्छा","शाबाश"],"olChiki":"ᱟᱹᱰᱤ ᱵᱮᱥ।","roman":"Adi bes."},
+    {"hindi":"फिर से कोशिश करो।","keywords":["फिर से","कोशिश"],"olChiki":"ᱫᱚᱦᱲᱟ ᱠᱩᱨᱩᱢᱩᱴᱩ ᱢᱮ।","roman":"Dohra kurumutu me."},
+    {"hindi":"एक से दस तक गिनो।","keywords":["दस तक","गिनो"],"olChiki":"ᱢᱤᱫ ᱠᱷᱚᱱ ᱜᱮᱞ ᱫᱷᱟᱹᱵᱤᱡ ᱞᱮᱠᱷᱟ ᱢᱮ।","roman":"Mit khon gel dhabij lekha me."}
+  ]
+}

@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f8f3" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="description"
+      content="VoiceMate — a simple offline-first Hindi and Santhali classroom assistant."
+    />
+    <title>VoiceMate — Classroom translator</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="#" aria-label="VoiceMate home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img">
+              <path d="M8 11.5v9M12 8v16M16 5v22M20 9v14M24 12v8" />
+            </svg>
+          </span>
+          <span>VoiceMate</span>
+        </a>
+
+        <nav class="nav-list">
+          <button class="nav-item active" data-view="classroom">
+            <svg viewBox="0 0 24 24"><path d="M4 5h16v11H4zM8 20h8M12 16v4" /></svg>
+            Classroom
+          </button>
+          <button class="nav-item" data-view="lessons">
+            <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5zM20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5z" /></svg>
+            Lessons
+          </button>
+          <button class="nav-item" data-view="worksheets">
+            <svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM9 11h6M9 15h6M9 7h3" /></svg>
+            Worksheets
+          </button>
+          <button class="nav-item" data-view="history">
+            <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5M4 4v4.5h4.5M12 8v5l3 2" /></svg>
+            History
+          </button>
+          <button class="nav-item" data-view="progress">
+            <svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" /></svg>
+            Progress
+          </button>
+          <button class="nav-item" data-view="settings">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.14.38.36.72.66 1 .3.27.69.42 1.1.42H21v4h-.1a1.7 1.7 0 0 0-1.5.58z" /></svg>
+            Settings
+          </button>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="pulse-dot"></span>
+          <div>
+            <strong>Offline ready</strong>
+            <p>Core classroom tools are available.</p>
+          </div>
+        </div>
+
+        <div class="profile">
+          <span class="avatar">AS</span>
+          <div>
+            <strong>Anita Soren</strong>
+            <small>Primary teacher</small>
+          </div>
+          <button class="icon-button" aria-label="Open profile menu">•••</button>
+        </div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <button class="menu-button" id="menuButton" aria-label="Open navigation">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <div class="mobile-brand">VoiceMate</div>
+          <div class="connection-pill" id="connectionPill">
+            <span class="pulse-dot"></span>
+            <span id="connectionText">Offline mode</span>
+          </div>
+          <button class="install-button" id="installButton" hidden>Install app</button>
+        </header>
+
+        <section class="view active" id="classroomView">
+          <div class="page-heading">
+            <div>
+              <span class="eyebrow">LIVE CLASSROOM</span>
+              <h1>Teach in Hindi.<br /><em>Reach every child.</em></h1>
+              <p>VoiceMate helps your class listen, learn and respond in Santhali.</p>
+            </div>
+            <div class="heading-actions">
+              <button class="secondary-button" id="openTranscriptionButton">
+                <svg viewBox="0 0 24 24"><path d="M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0zM5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+                Transcription
+              </button>
+              <button class="secondary-button" id="newSessionButton">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+                New session
+              </button>
+            </div>
+          </div>
+
+          <section class="lesson-context" aria-labelledby="contextTitle">
+            <div class="context-title">
+              <span class="context-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM8 10h8M8 14h5" /></svg>
+              </span>
+              <div>
+                <small id="contextTitle">TODAY'S LESSON</small>
+                <strong id="lessonSummary">Class 3 · Mathematics · Addition</strong>
+              </div>
+            </div>
+            <div class="context-fields">
+              <label>
+                <span>Class</span>
+                <select id="classSelect">
+                  <option>Class 1</option>
+                  <option>Class 2</option>
+                  <option selected>Class 3</option>
+                  <option>Class 4</option>
+                  <option>Class 5</option>
+                </select>
+              </label>
+              <label>
+                <span>Subject</span>
+                <select id="subjectSelect">
+                  <option selected>Mathematics</option>
+                  <option>Hindi</option>
+                  <option>Environmental Studies</option>
+                </select>
+              </label>
+              <label>
+                <span>Topic</span>
+                <select id="topicSelect">
+                  <option selected>Addition</option>
+                  <option>Subtraction</option>
+                  <option>Numbers</option>
+                  <option>Shapes</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="conversation-grid">
+            <article class="speech-card teacher-card">
+              <div class="card-topline">
+                <div class="speaker-label">
+                  <span class="speaker-avatar teacher">T</span>
+                  <div><small>TEACHER</small><strong>Hindi</strong></div>
+                </div>
+                <span class="language-code">HI</span>
+              </div>
+              <label class="sr-only" for="teacherInput">Teacher's Hindi sentence</label>
+              <textarea id="teacherInput" rows="5">आज हम जोड़ सीखेंगे। तीन आम और दो आम मिलाकर कितने आम होंगे?</textarea>
+              <div class="quick-prompts" aria-label="Quick prompts">
+                <button data-prompt="आज हम जोड़ सीखेंगे।">आज हम जोड़ सीखेंगे।</button>
+                <button data-prompt="क्या आप समझ गए?">क्या आप समझ गए?</button>
+                <button data-prompt="उत्तर बोलकर बताओ।">उत्तर बोलकर बताओ।</button>
+              </div>
+              <div class="card-actions">
+                <button class="mic-button" id="teacherMic" aria-label="Speak in Hindi">
+                  <svg viewBox="0 0 24 24"><path d="M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0zM5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" /></svg>
+                </button>
+                <span class="mic-hint" id="micHint">Tap mic or type your sentence</span>
+                <button class="primary-button" id="translateButton">
+                  Translate
+                  <svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" /></svg>
+                </button>
+              </div>
+            </article>
+
+            <div class="flow-indicator" aria-hidden="true">
+              <span></span>
+              <svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" /></svg>
+              <small>&lt; 3 sec</small>
+            </div>
+
+            <article class="speech-card student-card">
+              <div class="card-topline">
+                <div class="speaker-label">
+                  <span class="speaker-avatar student">S</span>
+                  <div><small>STUDENT HEARS</small><strong>Santhali</strong></div>
+                </div>
+                <span class="language-code">SAT</span>
+              </div>
+              <div class="translation-output" id="translationOutput" lang="sat">
+                <p class="ol-chiki">ᱛᱮᱦᱮᱧ ᱟᱵᱚ ᱥᱮᱞᱮᱫ ᱵᱚ ᱥᱮᱪᱮᱫᱟ।</p>
+                <p>Tehen abo seled bo secheda. Pe am ar bar am selet kate tinak am huyuk'a?</p>
+              </div>
+              <div class="confidence-row">
+                <span><i></i> Translation ready</span>
+                <span id="confidenceText">92% confidence</span>
+              </div>
+              <div class="card-actions output-actions">
+                <button class="listen-button" id="listenButton">
+                  <svg viewBox="0 0 24 24"><path d="M5 10v4h4l5 4V6l-5 4zM17 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12" /></svg>
+                  Listen
+                </button>
+                <button class="text-button" id="editTranslationButton">Edit translation</button>
+              </div>
+            </article>
+          </section>
+
+          <section class="response-strip">
+            <div>
+              <span class="response-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0zM5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+              </span>
+              <div>
+                <strong>Let the student respond</strong>
+                <p>Capture a Santhali answer and show it to the teacher in Hindi.</p>
+              </div>
+            </div>
+            <button class="student-response-button" id="studentResponseButton">Start student response</button>
+          </section>
+
+          <div class="mini-stats">
+            <div><strong id="phraseCount">01</strong><span>Phrases translated</span></div>
+            <div><strong>~1.8s</strong><span>Average response</span></div>
+            <div><strong>100%</strong><span>Available offline</span></div>
+          </div>
+        </section>
+
+        <section class="view placeholder-view" id="lessonsView">
+          <div class="section-heading"><div><span class="eyebrow">CONTENT LIBRARY</span><h2>Saved lessons</h2><p>Prepare lesson contexts once and reuse them offline.</p></div><button class="primary-button" id="addLessonButton">+ Add lesson</button></div>
+          <div class="toolbar">
+            <label class="search-field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="lessonSearch" placeholder="Search lessons" /></label>
+            <select id="lessonFilter" aria-label="Filter lessons by subject"><option>All subjects</option><option>Mathematics</option><option>Hindi</option><option>Environmental Studies</option></select>
+          </div>
+          <div class="lesson-list" id="lessonList"></div>
+        </section>
+
+        <section class="view placeholder-view" id="worksheetsView">
+          <div class="section-heading"><div><span class="eyebrow">BILINGUAL CONTENT</span><h2>Worksheet builder</h2><p>Create a simple Hindi + Santhali worksheet from today's topic.</p></div></div>
+          <div class="worksheet-builder">
+            <div class="worksheet-preview" id="worksheetPreview"></div>
+            <div class="worksheet-controls">
+              <h3>Worksheet options</h3>
+              <label>Number of questions<select id="questionCount"><option>3</option><option selected>5</option><option>8</option></select></label>
+              <label>Difficulty<select id="difficulty"><option>Easy</option><option selected>Mixed</option><option>Practice</option></select></label>
+              <button class="primary-button full" id="generateWorksheetButton">Generate worksheet</button>
+              <button class="secondary-button full" id="saveWorksheetButton">Save worksheet</button>
+              <button class="secondary-button full" id="printWorksheetButton">Print / Save PDF</button>
+              <p class="saved-note"><strong id="savedWorksheetCount">0</strong> worksheets saved on this device</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="view placeholder-view" id="historyView">
+          <div class="section-heading"><div><span class="eyebrow">THIS DEVICE</span><h2>Translation history</h2><p>Your recent classroom translations are stored locally.</p></div><div class="heading-actions"><button class="secondary-button" id="exportHistoryButton">Export CSV</button><button class="secondary-button danger-text" id="clearHistoryButton">Clear history</button></div></div>
+          <div class="toolbar"><label class="search-field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="historySearch" placeholder="Search translations" /></label><span class="result-count" id="historyCount">0 translations</span></div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+
+        <section class="view placeholder-view" id="progressView">
+          <div class="section-heading"><div><span class="eyebrow">CLASSROOM INSIGHTS</span><h2>Learning progress</h2><p>A simple local overview of classroom activity.</p></div><select id="progressRange" aria-label="Progress time range"><option>Last 7 days</option><option>Last 30 days</option><option>All time</option></select></div>
+          <div class="metric-grid">
+            <article class="metric-card green"><span>TRANSLATIONS</span><strong id="progressTranslations">0</strong><small>Hindi ↔ Santhali phrases</small></article>
+            <article class="metric-card orange"><span>LESSONS</span><strong id="progressLessons">0</strong><small>Prepared and available offline</small></article>
+            <article class="metric-card yellow"><span>WORKSHEETS</span><strong id="progressWorksheets">0</strong><small>Saved bilingual activities</small></article>
+            <article class="metric-card blue"><span>RESPONSE RATE</span><strong id="progressResponses">0%</strong><small>Student replies recorded</small></article>
+          </div>
+          <div class="insight-grid">
+            <article class="panel activity-panel"><div class="panel-heading"><div><small>WEEKLY ACTIVITY</small><h3>Classroom usage</h3></div><span class="legend"><i></i> Translations</span></div><div class="bar-chart" id="activityChart"></div></article>
+            <article class="panel"><div class="panel-heading"><div><small>OFFLINE READINESS</small><h3>Content status</h3></div></div><div class="readiness-ring"><div><strong>100%</strong><span>Ready</span></div></div><ul class="status-list"><li><span>Core lesson library</span><strong>Available</strong></li><li><span>Translation phrasebook</span><strong>Available</strong></li><li><span>Pending cloud sync</span><strong id="pendingSync">0 items</strong></li></ul></article>
+          </div>
+          <article class="panel"><div class="panel-heading"><div><small>RECENT ACTIVITY</small><h3>Latest classroom events</h3></div></div><div id="activityFeed" class="activity-feed"></div></article>
+        </section>
+
+        <section class="view placeholder-view" id="settingsView">
+          <div class="section-heading"><div><span class="eyebrow">APP PREFERENCES</span><h2>Settings</h2><p>These preferences are stored only on this device.</p></div><span class="save-state" id="settingsState">All changes saved</span></div>
+          <div class="settings-grid">
+            <section class="panel settings-panel"><div class="panel-heading"><div><small>TEACHER PROFILE</small><h3>Your details</h3></div></div><label>Teacher name<input id="teacherName" value="Anita Soren" /></label><label>School name<input id="schoolName" value="Government Primary School" /></label><label>Default class<select id="defaultClass"><option>Class 1</option><option>Class 2</option><option selected>Class 3</option><option>Class 4</option><option>Class 5</option></select></label><button class="primary-button" id="saveProfileButton">Save profile</button></section>
+            <section class="panel settings-panel"><div class="panel-heading"><div><small>CLASSROOM EXPERIENCE</small><h3>Translation preferences</h3></div></div><label class="toggle-row"><span><strong>Auto-play translation</strong><small>Speak after each translation</small></span><input type="checkbox" id="autoSpeak" /></label><label class="toggle-row"><span><strong>Show Ol Chiki script</strong><small>Display native Santhali script</small></span><input type="checkbox" id="showScript" checked /></label><label class="toggle-row"><span><strong>Offline-only mode</strong><small>Never require an internet connection</small></span><input type="checkbox" id="offlineOnly" checked /></label><label>Speech speed<input type="range" id="speechRate" min="0.6" max="1.2" value="0.88" step="0.05" /><output id="speechRateOutput">0.88×</output></label></section>
+            <section class="panel settings-panel data-panel"><div class="panel-heading"><div><small>LOCAL DATA</small><h3>Backup and storage</h3></div><span id="storageUsed">0 KB</span></div><p>Export a backup of lessons, translations, worksheets, and preferences.</p><div class="data-actions"><button class="secondary-button" id="exportDataButton">Export backup</button><label class="secondary-button file-label">Import backup<input type="file" id="importDataInput" accept="application/json" /></label><button class="secondary-button danger-text" id="resetDataButton">Reset all data</button></div></section>
+            <section class="panel settings-panel about-panel"><div class="panel-heading"><div><small>ABOUT</small><h3>VoiceMate Prototype</h3></div><span class="version-badge">v1.0</span></div><p>Offline-first Hindi ↔ Santhali classroom assistant for mother-tongue education.</p><div class="model-status"><i></i><div><strong>Demo translation engine</strong><small>Replace phrasebook with production ASR, NMT and TTS models.</small></div></div></section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="responseDialog">
+      <form method="dialog" class="dialog-card">
+        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+        <span class="dialog-icon">
+          <svg viewBox="0 0 24 24"><path d="M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0zM5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+        </span>
+        <span class="eyebrow">STUDENT RESPONSE</span>
+        <h2>What did the student say?</h2>
+        <p>For this demo, enter the Santhali response in Roman script.</p>
+        <input id="studentInput" value="Moṛe am." aria-label="Student response in Santhali" />
+        <button class="primary-button full" id="convertResponseButton" value="default">Show teacher</button>
+        <div class="teacher-result" id="teacherResult" hidden>
+          <small>HINDI TRANSLATION</small>
+          <strong>पाँच आम।</strong>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="lessonDialog">
+      <form method="dialog" class="dialog-card form-dialog" id="lessonForm">
+        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+        <span class="eyebrow">NEW OFFLINE LESSON</span>
+        <h2>Add a lesson</h2>
+        <p>Create a reusable lesson context for the classroom.</p>
+        <label>Topic<input id="newLessonTopic" required placeholder="e.g. Multiplication" /></label>
+        <label>Class<select id="newLessonClass"><option>Class 1</option><option>Class 2</option><option selected>Class 3</option><option>Class 4</option><option>Class 5</option></select></label>
+        <label>Subject<select id="newLessonSubject"><option>Mathematics</option><option>Hindi</option><option>Environmental Studies</option></select></label>
+        <label>Description<textarea id="newLessonDescription" rows="3" placeholder="What will students learn?"></textarea></label>
+        <button class="primary-button full" id="createLessonButton" value="default">Save lesson</button>
+      </form>
+    </dialog>
+
+    <dialog id="transcriptionDialog">
+      <form method="dialog" class="dialog-card transcription-dialog">
+        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+        <span class="dialog-icon" id="transcriptionIcon"><svg viewBox="0 0 24 24"><path d="M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0zM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></span>
+        <span class="eyebrow">HINDI SPEECH-TO-TEXT</span>
+        <h2>Live transcription</h2>
+        <p id="transcriptionStatus">Press start and speak naturally. You can edit the text before translating.</p>
+        <textarea id="transcriptionText" rows="7" placeholder="Your Hindi speech will appear here…"></textarea>
+        <div class="transcription-actions"><button class="primary-button" id="startTranscriptionButton" value="default">Start listening</button><button class="secondary-button" id="clearTranscriptionButton" value="default">Clear</button><button class="secondary-button" id="copyTranscriptionButton" value="default">Copy</button></div>
+        <button class="student-response-button full" id="useTranscriptionButton" value="default">Use in classroom translator →</button>
+      </form>
+    </dialog>
+
+    <dialog id="confirmDialog">
+      <form method="dialog" class="dialog-card confirm-dialog">
+        <span class="dialog-icon warning">!</span>
+        <h2 id="confirmTitle">Are you sure?</h2>
+        <p id="confirmMessage">This action cannot be undone.</p>
+        <div class="confirm-actions"><button class="secondary-button" value="cancel">Cancel</button><button class="primary-button danger" id="confirmAction" value="default">Continue</button></div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

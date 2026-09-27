@@ -1,0 +1,10 @@
+{
+  "name": "VoiceMate Classroom Assistant",
+  "short_name": "VoiceMate",
+  "description": "Offline-first Hindi and Santhali classroom assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f6f1",
+  "theme_color": "#153f31",
+  "icons": [{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
