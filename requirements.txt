@@ -1,0 +1,6 @@
+torch==2.14.0
+transformers==4.47.1
+sentencepiece
+sacremoses
+protobuf
+IndicTransToolkit==1.1.1

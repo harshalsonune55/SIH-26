@@ -317,3 +317,11 @@ dialog::backdrop { background: rgba(15,28,20,.55); backdrop-filter: blur(3px); }
   .worksheet-builder { display: block; }
   .worksheet-preview { border: 0; box-shadow: none; padding: 20px; }
 }
+@font-face {
+  font-family: "Noto Sans Ol Chiki";
+  src: url("/fonts/NotoSansOlChiki-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+.ol-chiki, #santhaliOutput, textarea.santhali {
+  font-family: "Noto Sans Ol Chiki", sans-serif;
+}

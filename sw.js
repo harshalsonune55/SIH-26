@@ -1,4 +1,4 @@
-const CACHE = "voicemate-v1";
+const CACHE = "voicemate-v3";
 const ASSETS = ["/", "/index.html", "/styles.css", "/app.js", "/manifest.webmanifest", "/icon.svg", "/data/phrasebook.json"];
 
 self.addEventListener("install", event => {
