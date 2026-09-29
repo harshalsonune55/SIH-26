@@ -65,29 +65,42 @@ async function syncNow({ quiet = false } = {}) {
   } catch { backendOnline = false; updateConnection(); if (!quiet) showToast("Sync paused. Local data is unchanged."); return false; }
 }
 async function loadPhrasebook() {
-  try { const response = await fetch("data/phrasebook.json"); if (response.ok) { const data = await response.json(); phrases = data.phrases.map(item => ({ keywords: item.keywords, olChiki: item.olChiki, roman: item.roman })); } } catch { phrases = DEFAULT_PHRASES; }
+  try { const response = await fetch("data/phrasebook.json"); if (response.ok) { const data = await response.json(); phrases = data.phrases.map(item => ({ hindi: item.hindi, keywords: item.keywords, olChiki: item.olChiki, roman: item.roman })); } } catch { phrases = DEFAULT_PHRASES; }
 }
-function selectTranslation(text) {
-  const matches = phrases.filter(item => item.keywords.some(keyword => text.includes(keyword)));
-  if (matches.length) { const unique = matches.filter((item, index) => matches.findIndex(candidate => candidate.roman === item.roman) === index); return { olChiki: unique.map(item => item.olChiki).join(" "), roman: unique.map(item => item.roman).join(" "), confidence: Math.max(78, 96 - unique.length * 2) }; }
-  return { olChiki: "ᱱᱚᱶᱟ ᱢᱮᱥᱮᱡ ᱨᱮᱭᱟᱜ ᱛᱮᱞᱟ ᱯᱷᱨᱮᱡᱽᱵᱩᱠ ᱨᱮ ᱵᱟᱹᱱᱩᱜᱼᱟ।", roman: "Translation not found in the offline demo phrasebook.", confidence: 42 };
+function normalizeHindi(text) { return text.replace(/[।.?!,\s]+$/g, "").replace(/\s+/g, " ").trim(); }
+// 1) exact phrasebook match (curated), 2) machine translation via /api/translate, 3) old keyword hint as last resort.
+async function selectTranslation(text) {
+  const clean = normalizeHindi(text);
+  const exact = phrases.find(item => item.hindi && normalizeHindi(item.hindi) === clean);
+  if (exact) return { olChiki: exact.olChiki, roman: exact.roman, confidence: null, label: "Phrasebook match (curated)", source: "phrasebook" };
+  let failure = "";
+  try {
+    const response = await fetch("/api/translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    const data = await response.json();
+    if (data.ok && data.olChiki) return { olChiki: data.olChiki, roman: data.roman || "", confidence: null, label: `Machine translation${data.cached ? " (cached)" : ""} · review before classroom use`, source: "model" };
+    failure = data.error || "Translation service error";
+  } catch { failure = "Server not reachable (offline)"; }
+  const hinted = phrases.filter(item => item.keywords && item.keywords.some(keyword => text.includes(keyword)));
+  if (hinted.length) { const item = hinted[0]; return { olChiki: item.olChiki, roman: item.roman, confidence: null, label: `Closest phrasebook hint only, may not match your sentence. ${failure}`, source: "hint" }; }
+  return { olChiki: "", roman: `Translation unavailable: ${failure}`, confidence: null, label: failure, source: "none" };
 }
 function speakCurrent() {
   if (!("speechSynthesis" in window) || !currentTranslation) return showToast("Audio playback is not supported here.");
+  if (!currentTranslation.roman || currentTranslation.source === "none") return showToast("No Romanized text to read aloud (browsers have no Santhali voice).");
   speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(currentTranslation.roman); utterance.lang = "hi-IN"; utterance.rate = Number(state.settings.speechRate);
   utterance.onstart = () => $("#listenButton").classList.add("playing"); utterance.onend = () => $("#listenButton").classList.remove("playing"); speechSynthesis.speak(utterance);
 }
-function translate() {
+async function translate() {
   const hindi = $("#teacherInput").value.trim(); if (!hindi) return showToast("Type, paste, or transcribe a Hindi sentence first.");
   const button = $("#translateButton"), output = $("#translationOutput"); button.disabled = true; button.textContent = "Translating…"; output.style.opacity = ".35";
-  setTimeout(() => {
-    currentTranslation = selectTranslation(hindi);
-    output.innerHTML = `${state.settings.showScript ? `<p class="ol-chiki">${escapeHtml(currentTranslation.olChiki)}</p>` : ""}<p>${escapeHtml(currentTranslation.roman)}</p>`;
-    $("#confidenceText").textContent = `${currentTranslation.confidence}% confidence`;
-    state.history.unshift({ id: uid("translation"), hindi, santhali: currentTranslation.roman, olChiki: currentTranslation.olChiki, lesson: $("#lessonSummary").textContent, at: new Date().toISOString() }); state.history = state.history.slice(0, 200);
+  try {
+    currentTranslation = await selectTranslation(hindi);
+    output.innerHTML = `${state.settings.showScript && currentTranslation.olChiki ? `<p class="ol-chiki">${escapeHtml(currentTranslation.olChiki)}</p>` : ""}${currentTranslation.roman ? `<p>${escapeHtml(currentTranslation.roman)}</p>` : ""}`;
+    $("#confidenceText").textContent = currentTranslation.label;
+    state.history.unshift({ id: uid("translation"), hindi, santhali: currentTranslation.roman || currentTranslation.olChiki, olChiki: currentTranslation.olChiki, lesson: $("#lessonSummary").textContent, at: new Date().toISOString() }); state.history = state.history.slice(0, 200);
     sessionTranslations += 1; $("#phraseCount").textContent = String(sessionTranslations).padStart(2, "0"); persist({ queue: true }); output.style.opacity = "1"; button.disabled = false;
-    button.innerHTML = 'Translate <svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>'; showToast("Translation ready and saved offline."); if (state.settings.autoSpeak) speakCurrent();
-  }, 500);
+    button.innerHTML = 'Translate <svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>'; showToast(currentTranslation.source === "none" ? "Could not translate. See message." : "Translation ready and saved offline."); if (state.settings.autoSpeak) speakCurrent();
+  } catch (error) { output.style.opacity = "1"; button.disabled = false; button.innerHTML = 'Translate <svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>'; showToast("Translation failed: " + error.message); }
 }
 function updateLessonSummary() { $("#lessonSummary").textContent = [$("#classSelect").value, $("#subjectSelect").value, $("#topicSelect").value].join(" · "); }
 
