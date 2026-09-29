@@ -178,7 +178,7 @@ function setupSpeechRecognition() {
 }
 
 function bindEvents() {
-  $$(".nav-item").forEach(item => item.addEventListener("click", () => setView(item.dataset.view))); $("#menuButton").addEventListener("click", () => $(".sidebar").classList.toggle("open")); $("#connectionPill").addEventListener("click", () => syncNow());
+  $$(".nav-item[data-view]").forEach(item => item.addEventListener("click", () => setView(item.dataset.view))); $("#menuButton").addEventListener("click", () => $(".sidebar").classList.toggle("open")); $("#connectionPill").addEventListener("click", () => syncNow());
   $("#translateButton").addEventListener("click", translate); $$("[data-prompt]").forEach(button => button.addEventListener("click", () => { $("#teacherInput").value = button.dataset.prompt; $("#teacherInput").focus(); })); $("#listenButton").addEventListener("click", speakCurrent);
   $("#editTranslationButton").addEventListener("click", event => { const editing = $("#translationOutput").contentEditable === "true"; $("#translationOutput").contentEditable = String(!editing); event.currentTarget.textContent = editing ? "Edit translation" : "Save translation"; if (!editing) $("#translationOutput").focus(); else showToast("Correction saved for this session."); });
   [$("#classSelect"), $("#subjectSelect"), $("#topicSelect")].forEach(field => field.addEventListener("change", updateLessonSummary));

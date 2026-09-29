@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#153f31" />
+    <meta
+      name="description"
+      content="How VoiceMate works — a Hindi to Santhali classroom assistant that works offline."
+    />
+    <title>VoiceMate — how it works</title>
+    <link rel="icon" href="../icon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      html { scroll-behavior: smooth; }
+
+      /* ../styles.css sets overflow-x: hidden on body, which turns body into a
+         scroll container and silently disables position: sticky. clip keeps the
+         overflow guard without creating a scroller. */
+      body {
+        overflow-x: clip;
+        background-color: var(--canvas);
+        background-image: radial-gradient(rgba(34, 98, 74, .075) 1px, transparent 1px);
+        background-size: 26px 26px;
+      }
+
+      .squiggle {
+        text-decoration: underline;
+        text-decoration-style: wavy;
+        text-decoration-color: var(--yellow);
+        text-decoration-thickness: 5px;
+        text-underline-offset: 10px;
+      }
+
+      /* ---------- topbar ---------- */
+
+      .docs-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        height: 64px;
+        padding: 0 30px;
+        background: rgba(250, 251, 247, .9);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid #e3e7df;
+      }
+
+      .docs-brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        color: var(--ink);
+        text-decoration: none;
+        font: 800 19px/1 "Manrope", sans-serif;
+      }
+
+      .docs-brand .brand-mark {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        color: #173e31;
+        background: var(--yellow);
+        transform: rotate(-6deg);
+      }
+
+      .docs-brand .brand-mark svg { width: 23px; stroke-width: 2.4; }
+      .docs-brand em { font-style: normal; color: var(--muted); font-weight: 700; }
+      .docs-brand em::before { content: "/"; margin: 0 7px; color: #bcc4bd; }
+      .docs-topbar .secondary-button { padding: 9px 15px; font-size: 12px; text-decoration: none; }
+
+      /* ---------- layout ---------- */
+
+      .docs-layout {
+        display: grid;
+        grid-template-columns: 234px minmax(0, 1fr);
+        gap: 52px;
+        max-width: 1270px;
+        margin: 0 auto;
+        padding: 38px 30px 90px;
+      }
+
+      .docs-toc {
+        position: sticky;
+        top: 94px;
+        align-self: start;
+        max-height: calc(100vh - 128px);
+        overflow-y: auto;
+      }
+
+      .toc-title {
+        color: #758078;
+        letter-spacing: .16em;
+        font-size: 10px;
+        font-weight: 800;
+        margin-bottom: 13px;
+      }
+
+      .toc-link {
+        display: flex;
+        gap: 11px;
+        align-items: baseline;
+        padding: 7px 11px;
+        border-radius: 8px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: .18s ease;
+      }
+
+      .toc-link span { color: #adb6af; font: 800 9px/1 "Manrope", sans-serif; letter-spacing: .1em; }
+      .toc-link:hover { color: var(--ink); background: #ecf0ea; }
+      .toc-link.active { color: #173e31; background: #f5d36b; }
+      .toc-link.active span { color: #6b6334; }
+
+      .toc-note {
+        margin-top: 22px;
+        padding: 15px;
+        border: 1px dashed #c4cdc4;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, .7);
+        transform: rotate(-.6deg);
+      }
+
+      .toc-note strong { display: block; font-size: 12px; }
+      .toc-note p { margin: 5px 0 10px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+      .toc-note a { color: var(--green); font-size: 11px; font-weight: 700; text-decoration: none; }
+
+      /* ---------- hero ---------- */
+
+      .docs-content { min-width: 0; }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 54px 46px 44px;
+        border-radius: 4px 4px 4px 34px;
+        color: white;
+        background: linear-gradient(155deg, #1d5240 0%, #153f31 55%, #113227 100%);
+        box-shadow: var(--shadow);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -70px;
+        top: -80px;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: rgba(246, 212, 107, .13);
+      }
+
+      .hero > * { position: relative; z-index: 1; }
+
+      .hero .tape {
+        position: absolute;
+        top: 24px;
+        right: -30px;
+        z-index: 3;
+        padding: 7px 36px;
+        color: #4a3f16;
+        background: rgba(246, 212, 107, .9);
+        font: 800 10px/1 "Manrope", sans-serif;
+        letter-spacing: .18em;
+        transform: rotate(4deg);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, .18);
+      }
+
+      .hero .eyebrow { color: #a4c4b3; }
+      .hero h1 { margin: 14px 0 16px; max-width: 660px; font-size: clamp(34px, 4.6vw, 52px); letter-spacing: -.045em; line-height: 1.05; }
+      .hero h1 em { color: var(--yellow); font-style: normal; }
+      .hero .lead { max-width: 620px; margin: 0; color: #c9dcd2; font-size: 15.5px; line-height: 1.75; }
+
+      .hero-facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 26px;
+        margin-top: 26px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, .14);
+        color: #b9cfc4;
+        font-size: 12px;
+      }
+
+      .hero-facts b { color: white; font-weight: 700; }
+
+      .doodle { display: block; width: 96px; margin: 22px 0 -4px 6px; }
+      .doodle path { fill: none; stroke: var(--yellow); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+      .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+      .hero-actions a { text-decoration: none; }
+      .hero-actions .primary-button { color: #173e31; background: var(--yellow); border-color: var(--yellow); }
+      .hero-actions .primary-button:hover { background: #f0c751; border-color: #f0c751; }
+      .hero-actions .secondary-button { color: white; background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .24); }
+      .hero-actions .secondary-button:hover { background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .4); }
+
+      /* ---------- sections ---------- */
+
+      .doc-section { scroll-margin-top: 92px; margin-top: 64px; }
+      .doc-section:first-of-type { margin-top: 52px; }
+
+      .sec-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; margin-bottom: 18px; }
+
+      .sec-num {
+        font: 800 46px/.85 "Manrope", sans-serif;
+        color: transparent;
+        -webkit-text-stroke: 1.4px #c3cdc4;
+        letter-spacing: -.04em;
+        user-select: none;
+      }
+
+      .sec-head .eyebrow { display: block; margin-bottom: 7px; }
+      .sec-head h2 { margin: 0; font-size: clamp(26px, 3vw, 34px); letter-spacing: -.035em; }
+
+      .doc-section p { max-width: 760px; color: #4b564e; font-size: 15.5px; line-height: 1.8; }
+      .doc-section p strong { color: var(--ink); }
+      .doc-section p + p { margin-top: 14px; }
+
+      .plain-list { max-width: 760px; margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 0; }
+      .plain-list li {
+        position: relative;
+        padding: 13px 0 13px 30px;
+        border-bottom: 1px dashed #d5dcd5;
+        color: #4b564e;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+      .plain-list li:first-child { border-top: 1px dashed #d5dcd5; }
+      .plain-list li::before {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 21px;
+        width: 8px;
+        height: 8px;
+        background: var(--orange);
+        transform: rotate(45deg);
+      }
+
+      /* ---------- diagrams ---------- */
+
+      figure.flow { margin: 26px 0 0; }
+      figure.flow + figure.flow { margin-top: 34px; }
+
+      .flow-block {
+        margin: 0;
+        padding: 28px 26px;
+        overflow-x: auto;
+        border: 1px solid #1d3f33;
+        border-radius: 4px;
+        color: #cfe4d9;
+        background: #11251d;
+        text-align: center;
+        white-space: pre;
+        font: 500 13px/1.9 ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        box-shadow: 6px 6px 0 rgba(23, 48, 38, .12);
+      }
+
+      figure.flow figcaption {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 13px;
+        color: var(--muted);
+        font-size: 12.5px;
+        font-style: italic;
+      }
+
+      figure.flow figcaption::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green);
+        flex: 0 0 auto;
+      }
+
+      /* ---------- features ledger ---------- */
+
+      .ledger { margin-top: 26px; border-top: 2px solid var(--ink); }
+
+      .ledger-row {
+        display: grid;
+        grid-template-columns: 54px 250px minmax(0, 1fr);
+        gap: 24px;
+        padding: 26px 0;
+        border-bottom: 1px solid var(--line);
+        align-items: start;
+      }
+
+      .ledger-row .idx { color: var(--orange); font: 800 12px/1.6 "Manrope", sans-serif; letter-spacing: .14em; }
+      .ledger-row h3 { margin: 0; font-size: 19px; letter-spacing: -.02em; }
+      .ledger-row p { margin: 0; font-size: 14.5px; line-height: 1.75; }
+
+      .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+      .tag {
+        padding: 5px 10px;
+        border: 1px solid #cfd9d0;
+        border-radius: 3px;
+        color: var(--green);
+        background: #f7faf6;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: .03em;
+      }
+
+      /* ---------- taped note ---------- */
+
+      .note {
+        position: relative;
+        max-width: 620px;
+        margin-top: 34px;
+        padding: 26px 26px 22px;
+        background: #fff8dd;
+        box-shadow: 0 14px 30px rgba(60, 55, 20, .1);
+        transform: rotate(-.8deg);
+      }
+
+      .note::before {
+        content: "";
+        position: absolute;
+        top: -11px;
+        left: 50%;
+        width: 108px;
+        height: 24px;
+        background: rgba(246, 212, 107, .7);
+        border-left: 1px dashed rgba(150, 125, 30, .4);
+        border-right: 1px dashed rgba(150, 125, 30, .4);
+        transform: translateX(-50%) rotate(-1.5deg);
+      }
+
+      .note strong { display: block; margin-bottom: 6px; font-size: 13.5px; }
+      .note p { margin: 0; color: #6d6552; font-size: 14px; line-height: 1.7; }
+
+      /* ---------- offline steps ---------- */
+
+      .step-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0; margin-top: 28px; border-top: 1px solid var(--line); }
+      .step { padding: 20px 22px 20px 0; border-right: 1px dashed var(--line); }
+      .step:last-child { border-right: 0; }
+      .step b { display: block; color: var(--orange); font: 800 10px/1 "Manrope", sans-serif; letter-spacing: .16em; }
+      .step strong { display: block; margin: 10px 0 6px; font-size: 15px; }
+      .step p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+      /* ---------- stack ---------- */
+
+      .stack-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-top: 26px; }
+
+      .stack-group {
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: white;
+        box-shadow: 4px 4px 0 rgba(35, 54, 43, .05);
+      }
+
+      .stack-group > h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 16px; }
+      .stack-group > h3 i { width: 9px; height: 9px; background: var(--green); transform: rotate(45deg); }
+
+      .stack-row { display: grid; grid-template-columns: 140px 1fr; gap: 14px; padding: 11px 0; border-top: 1px solid #edf0eb; }
+      .stack-row strong { font-size: 12.5px; color: var(--ink); }
+      .stack-row span { color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+
+      /* ---------- benefits ---------- */
+
+      .win-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0 34px;
+        margin-top: 24px;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--line);
+      }
+
+      .win-list li {
+        position: relative;
+        padding: 18px 0 18px 34px;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .win-list li strong { display: block; margin-bottom: 3px; color: var(--ink); font-size: 15.5px; }
+
+      .win-list li::before {
+        content: "✓";
+        position: absolute;
+        left: 2px;
+        top: 17px;
+        color: var(--green);
+        font: 800 16px/1 "Manrope", sans-serif;
+      }
+
+      /* ---------- impact ---------- */
+
+      .impact-panel {
+        position: relative;
+        overflow: hidden;
+        margin-top: 28px;
+        padding: 38px;
+        border-radius: 4px;
+        color: #eaf4ee;
+        background: linear-gradient(150deg, #1a4a39, #123428);
+      }
+
+      .impact-panel::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        bottom: -80px;
+        width: 210px;
+        height: 210px;
+        border-radius: 50%;
+        background: rgba(246, 212, 107, .12);
+      }
+
+      .impact-panel > * { position: relative; z-index: 1; }
+      .impact-panel h3 { margin: 0 0 14px; font-size: clamp(21px, 2.6vw, 26px); color: white; letter-spacing: -.02em; }
+      .impact-panel p { max-width: 740px; margin: 0 0 15px; font-size: 15px; line-height: 1.8; color: #c6dbd0; }
+      .impact-panel p:last-child { margin-bottom: 0; }
+      .impact-panel p strong { color: #fff; }
+
+      /* ---------- footer ---------- */
+
+      .docs-footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 70px;
+        padding-top: 22px;
+        border-top: 2px solid var(--ink);
+        color: var(--muted);
+        font-size: 12.5px;
+      }
+
+      .docs-footer a { color: var(--green); font-weight: 700; text-decoration: none; }
+      .docs-footer nav { display: flex; flex-wrap: wrap; gap: 18px; }
+
+      /* ---------- responsive ---------- */
+
+      @media (max-width: 1080px) {
+        .docs-layout { grid-template-columns: 206px minmax(0, 1fr); gap: 34px; }
+        .ledger-row { grid-template-columns: 44px minmax(0, 1fr); gap: 16px; }
+        .ledger-row p, .ledger-row .tag-row { grid-column: 2; }
+      }
+
+      @media (max-width: 900px) {
+        .docs-layout { grid-template-columns: minmax(0, 1fr); gap: 26px; padding-top: 24px; }
+
+        .docs-toc {
+          position: sticky;
+          top: 64px;
+          z-index: 20;
+          max-height: none;
+          margin-top: -6px;
+          padding: 10px 0 8px;
+          background: var(--canvas);
+          border-bottom: 1px solid var(--line);
+        }
+
+        .docs-toc nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+        .toc-title, .toc-note { display: none; }
+        .toc-link { flex: 0 0 auto; padding: 8px 13px; border: 1px solid var(--line); background: white; white-space: nowrap; }
+        .toc-link span { display: none; }
+
+        .hero { padding: 40px 30px 36px; }
+        .step-row { grid-template-columns: 1fr 1fr; }
+        .step { border-right: 0; border-bottom: 1px dashed var(--line); }
+      }
+
+      @media (max-width: 720px) {
+        .docs-topbar { padding: 0 18px; }
+        .docs-topbar .secondary-button { padding: 8px 12px; font-size: 11px; }
+        .docs-layout { padding: 22px 18px 70px; }
+        .hero { padding: 34px 22px; border-radius: 4px 4px 4px 24px; }
+        .doodle { width: 76px; }
+        .sec-head { gap: 13px; }
+        .sec-num { font-size: 34px; }
+        .doc-section { margin-top: 52px; }
+        .flow-block { padding: 22px 14px; font-size: 11.5px; box-shadow: 4px 4px 0 rgba(23, 48, 38, .12); }
+        .ledger-row { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+        .ledger-row p, .ledger-row .tag-row { grid-column: 1; }
+        .step-row { grid-template-columns: 1fr; }
+        .stack-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+        .impact-panel { padding: 28px 22px; }
+        .note { transform: none; }
+        .docs-footer { flex-direction: column; align-items: flex-start; }
+      }
+
+      @media print {
+        .docs-topbar, .docs-toc, .hero-actions, .docs-footer nav { display: none !important; }
+        .docs-layout { display: block; padding: 0; }
+        body { background: white; }
+        .hero, .flow-block, .impact-panel { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .doc-section { break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" role="img">
+            <path d="M8 11.5v9M12 8v16M16 5v22M20 9v14M24 12v8" />
+          </svg>
+        </span>
+        <span>VoiceMate<em>docs</em></span>
+      </a>
+      <div class="heading-actions">
+        <a class="secondary-button" href="../">← Back to the app</a>
+      </div>
+    </header>
+
+    <div class="docs-layout">
+      <aside class="docs-toc" aria-label="On this page">
+        <div class="toc-title">ON THIS PAGE</div>
+        <nav>
+          <a class="toc-link active" href="#overview"><span>01</span> What it is</a>
+          <a class="toc-link" href="#problem"><span>02</span> The problem</a>
+          <a class="toc-link" href="#solution"><span>03</span> The lesson loop</a>
+          <a class="toc-link" href="#features"><span>04</span> Features</a>
+          <a class="toc-link" href="#offline"><span>05</span> Going offline</a>
+          <a class="toc-link" href="#stack"><span>06</span> The stack</a>
+          <a class="toc-link" href="#app-flow"><span>07</span> App flow</a>
+          <a class="toc-link" href="#live-flow"><span>08</span> Live class</a>
+          <a class="toc-link" href="#content-flow"><span>09</span> Content flow</a>
+          <a class="toc-link" href="#architecture"><span>10</span> Architecture</a>
+          <a class="toc-link" href="#benefits"><span>11</span> Payoff</a>
+          <a class="toc-link" href="#impact"><span>12</span> Impact</a>
+        </nav>
+        <div class="toc-note">
+          <strong>Working notes, v1.0</strong>
+          <p>Hindi ↔ Santhali classroom assistant. Built for the SIH problem statement.</p>
+          <a href="../">Open the app →</a>
+        </div>
+      </aside>
+
+      <main class="docs-content">
+        <section class="hero">
+          <span class="tape">WORKING DRAFT</span>
+          <span class="eyebrow">VOICEMATE / PROJECT DOCS</span>
+          <h1>The teacher speaks Hindi.<em> The class hears Santhali.</em></h1>
+          <p class="lead">
+            VoiceMate sits in the middle of a classroom where the teacher was trained in
+            Hindi and the kids think in Santhali. Everything below is how we built that,
+            why it behaves the way it does, and what still needs work.
+          </p>
+          <div class="hero-facts">
+            <span><b>Two languages</b>, both directions</span>
+            <span><b>Works offline</b>, syncs later</span>
+            <span><b>Teacher approves</b> every output</span>
+          </div>
+          <svg class="doodle" viewBox="0 0 100 54" aria-hidden="true">
+            <path d="M6 4c4 22 20 36 44 38" />
+            <path d="M40 32l12 11-16 3" />
+          </svg>
+          <div class="hero-actions">
+            <a class="primary-button" href="#problem">Start with the problem</a>
+            <a class="secondary-button" href="../">Open the classroom</a>
+          </div>
+        </section>
+
+        <!-- 01 -->
+        <section class="doc-section" id="overview">
+          <header class="sec-head">
+            <span class="sec-num">01</span>
+            <div>
+              <span class="eyebrow">WHAT IT IS</span>
+              <h2 class="squiggle">A bridge, not a translator</h2>
+            </div>
+          </header>
+          <p>
+            VoiceMate is a classroom assistant for schools where the teacher is
+            comfortable in Hindi and the students are most comfortable in Santhali. The
+            teacher keeps teaching the way they always have. The class hears the lesson
+            in Santhali, answers back in Santhali, and the teacher gets that answer in
+            Hindi.
+          </p>
+          <p>
+            Underneath there are four moving parts: speech into text, translation
+            between the two languages, a model that rewrites things at the right level
+            for the grade, and text back into speech. Around that we've wrapped lesson
+            material in both languages, worksheets, flashcards, a record of what
+            happened in class, and an offline layer, because in most of these schools the
+            network drops in and out all day.
+          </p>
+          <p>
+            Nothing goes in front of a class unseen. The teacher can open any
+            translation, fix the wording, and only then hand it to the students.
+          </p>
+
+          <div class="note">
+            <strong>Small print, since this is a prototype</strong>
+            <p>
+              The translation you can click through today runs on a hand-written
+              phrasebook of classroom lines, not a trained model. Speech recognition and
+              speech output lean on the browser where it's available. Everything here is
+              the shape of the thing; the production ASR, NMT and TTS still have to be
+              dropped in, and a native Santhali educator has to sign off on the content
+              before it ever reaches a real classroom.
+            </p>
+          </div>
+        </section>
+
+        <!-- 02 -->
+        <section class="doc-section" id="problem">
+          <header class="sec-head">
+            <span class="sec-num">02</span>
+            <div>
+              <span class="eyebrow">THE PROBLEM</span>
+              <h2 class="squiggle">Both sides are doing their best</h2>
+            </div>
+          </header>
+          <p>
+            The teacher in a tribal-area school is often trained entirely in Hindi. The
+            students in front of them speak Santhali at home and have probably heard
+            very little Hindi outside of it. Nobody in that room is failing, and the
+            lesson still lands badly.
+          </p>
+          <ul class="plain-list">
+            <li>Concepts get explained once, in the wrong language, and half the room nods without following</li>
+            <li>When students answer, the teacher has to guess what they actually said</li>
+            <li>Interactive work, group activities, quick checks, all of it slows to a crawl</li>
+            <li>There's nobody in the building to write the local-language material</li>
+            <li>Mother-tongue teaching stays a nice idea that can't be scaled across schools</li>
+            <li>And the cloud apps that could help assume a connection most of these classrooms don't have</li>
+          </ul>
+        </section>
+
+        <!-- 03 -->
+        <section class="doc-section" id="solution">
+          <header class="sec-head">
+            <span class="sec-num">03</span>
+            <div>
+              <span class="eyebrow">THE LESSON LOOP</span>
+              <h2 class="squiggle">One sentence, both ways</h2>
+            </div>
+          </header>
+          <p>
+            The whole product is a loop that runs in both directions. Going out: the
+            teacher's Hindi becomes Santhali the students can hear. Coming back: a
+            student's Santhali becomes Hindi the teacher can act on.
+          </p>
+
+          <figure class="flow">
+            <pre class="flow-block">Teacher speaks Hindi
+        ↓
+Speech-to-Text (ASR)
+        ↓
+Hindi Text
+        ↓
+Hindi → Santhali Translation
+        ↓
+Pedagogical AI
+        ↓
+Santhali Text
+        ↓
+Text-to-Speech (TTS)
+        ↓
+Student hears Santhali</pre>
+            <figcaption>Going out: the explanation reaches every student in Santhali</figcaption>
+          </figure>
+
+          <figure class="flow">
+            <pre class="flow-block">Student speaks Santhali
+        ↓
+ASR
+        ↓
+Santhali Text
+        ↓
+Santhali → Hindi Translation
+        ↓
+Teacher understands response</pre>
+            <figcaption>Coming back: the teacher hears the answer in Hindi</figcaption>
+          </figure>
+
+          <p>
+            The pedagogical step in the middle matters more than it looks. Instead of
+            translating a sentence word for word, it takes the grade, subject, topic and
+            learning objective into account and produces something a Class 3 student can
+            actually use.
+          </p>
+        </section>
+
+        <!-- 04 -->
+        <section class="doc-section" id="features">
+          <header class="sec-head">
+            <span class="sec-num">04</span>
+            <div>
+              <span class="eyebrow">FEATURES</span>
+              <h2 class="squiggle">What's in the box</h2>
+            </div>
+          </header>
+
+          <div class="ledger">
+            <article class="ledger-row">
+              <span class="idx">01</span>
+              <h3>Real-time voice translation</h3>
+              <p>
+                Hindi and Santhali, both ways, in the middle of a live lesson. Speech
+                becomes text, text crosses the language gap, and the result goes back out
+                as speech the room can hear.
+              </p>
+            </article>
+
+            <article class="ledger-row">
+              <span class="idx">02</span>
+              <h3>AI that knows the lesson</h3>
+              <p>
+                Given these four things, it rewrites the explanation for the right level
+                instead of handing over a literal translation.
+              </p>
+              <div class="tag-row">
+                <span class="tag">Grade</span>
+                <span class="tag">Subject</span>
+                <span class="tag">Topic</span>
+                <span class="tag">Learning objective</span>
+              </div>
+            </article>
+
+            <article class="ledger-row">
+              <span class="idx">03</span>
+              <h3>Material in both languages</h3>
+              <p>
+                Lessons, worksheets, flashcards, activities and question sets come out
+                side by side in Hindi and Santhali, ready to print or project.
+              </p>
+              <div class="tag-row">
+                <span class="tag">Lessons</span>
+                <span class="tag">Worksheets</span>
+                <span class="tag">Flashcards</span>
+                <span class="tag">Assessments</span>
+              </div>
+            </article>
+
+            <article class="ledger-row">
+              <span class="idx">04</span>
+              <h3>Reading the room</h3>
+              <p>
+                Answers get checked for what looks wrong or missing, so the teacher can
+                see where a concept slipped and pick the follow-up activity accordingly.
+              </p>
+            </article>
+
+            <article class="ledger-row">
+              <span class="idx">05</span>
+              <h3>Teacher in the loop</h3>
+              <p>
+                Every generated translation and every worksheet can be opened, edited and
+                confirmed before class. The AI drafts; the teacher decides.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <!-- 05 -->
+        <section class="doc-section" id="offline">
+          <header class="sec-head">
+            <span class="sec-num">05</span>
+            <div>
+              <span class="eyebrow">GOING OFFLINE</span>
+              <h2 class="squiggle">Assume the signal dies</h2>
+            </div>
+          </header>
+          <p>
+            This is the part we care about most. Lessons and language data get pulled
+            down while the connection is good, kept on the device, and used regardless of
+            what the network does during the school day. Anything that happens in class
+            is written locally first and pushed up when the internet comes back.
+          </p>
+
+          <figure class="flow">
+            <pre class="flow-block">Internet Available
+       ↓
+Download Lessons + Language Data
+       ↓
+Store Locally
+       ↓
+Internet Disconnected
+       ↓
+Continue Teaching Offline
+       ↓
+Save Activity Locally
+       ↓
+Internet Returns
+       ↓
+Synchronize Data</pre>
+            <figcaption>Cache it, teach from it, reconcile it later</figcaption>
+          </figure>
+
+          <div class="step-row">
+            <article class="step">
+              <b>STEP 01</b>
+              <strong>Cache</strong>
+              <p>Lessons and language data come down while the network is still there.</p>
+            </article>
+            <article class="step">
+              <b>STEP 02</b>
+              <strong>Store</strong>
+              <p>They stay on the teacher's device, not behind a login on a server.</p>
+            </article>
+            <article class="step">
+              <b>STEP 03</b>
+              <strong>Teach</strong>
+              <p>The class keeps running with the connection switched off.</p>
+            </article>
+            <article class="step">
+              <b>STEP 04</b>
+              <strong>Sync</strong>
+              <p>Whatever happened in class is waiting to go up when the signal returns.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- 06 -->
+        <section class="doc-section" id="stack">
+          <header class="sec-head">
+            <span class="sec-num">06</span>
+            <div>
+              <span class="eyebrow">THE STACK</span>
+              <h2 class="squiggle">What it's built with</h2>
+            </div>
+          </header>
+          <p>
+            Deliberately boring choices. The app has to run on the low-cost phones
+            teachers already carry, and the backend has to survive a school with no
+            reliable connection.
+          </p>
+
+          <div class="stack-groups">
+            <article class="stack-group">
+              <h3><i></i> Frontend</h3>
+              <div class="stack-row">
+                <strong>Flutter (Dart)</strong>
+                <span>One Android app that behaves on cheap hardware.</span>
+              </div>
+              <div class="stack-row">
+                <strong>Material Design</strong>
+                <span>Plain, predictable screens a teacher can learn in a minute.</span>
+              </div>
+            </article>
+
+            <article class="stack-group">
+              <h3><i></i> Backend</h3>
+              <div class="stack-row">
+                <strong>Python + FastAPI</strong>
+                <span>AI services, content management and sync endpoints.</span>
+              </div>
+              <div class="stack-row">
+                <strong>REST APIs</strong>
+                <span>How the app and the backend talk to each other.</span>
+              </div>
+            </article>
+
+            <article class="stack-group">
+              <h3><i></i> AI &amp; ML</h3>
+              <div class="stack-row">
+                <strong>ASR</strong>
+                <span>Speech from teacher or student into text.</span>
+              </div>
+              <div class="stack-row">
+                <strong>Translation</strong>
+                <span>Hindi ↔ Santhali, both directions.</span>
+              </div>
+              <div class="stack-row">
+                <strong>Pedagogical AI</strong>
+                <span>Explanations, activities and questions pitched at the right grade.</span>
+              </div>
+              <div class="stack-row">
+                <strong>TTS</strong>
+                <span>Translated text back into something the room can hear.</span>
+              </div>
+            </article>
+
+            <article class="stack-group">
+              <h3><i></i> Offline intelligence</h3>
+              <div class="stack-row">
+                <strong>On-device models</strong>
+                <span>Enough of the core loop to keep going with no signal.</span>
+              </div>
+              <div class="stack-row">
+                <strong>SQLite / local storage</strong>
+                <span>Lessons, language data and cached content on the phone.</span>
+              </div>
+            </article>
+
+            <article class="stack-group">
+              <h3><i></i> Database &amp; sync</h3>
+              <div class="stack-row">
+                <strong>PostgreSQL</strong>
+                <span>Users, curriculum and learning data in one place.</span>
+              </div>
+              <div class="stack-row">
+                <strong>Sync manager</strong>
+                <span>Pushes local changes up whenever connectivity returns.</span>
+              </div>
+            </article>
+
+            <article class="stack-group">
+              <h3><i></i> Cloud &amp; delivery</h3>
+              <div class="stack-row">
+                <strong>Google Cloud</strong>
+                <span>Backend and central services.</span>
+              </div>
+              <div class="stack-row">
+                <strong>GitHub</strong>
+                <span>Where the code and the history live.</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 07 -->
+        <section class="doc-section" id="app-flow">
+          <header class="sec-head">
+            <span class="sec-num">07</span>
+            <div>
+              <span class="eyebrow">APP FLOW</span>
+              <h2 class="squiggle">From login to lesson</h2>
+            </div>
+          </header>
+          <p>
+            Class, subject and topic get picked once at the top of the session. After
+            that the teacher just chooses what they need for this period.
+          </p>
+          <figure class="flow">
+            <pre class="flow-block">Login
+  ↓
+Teacher Dashboard
+  ↓
+Select Class
+  ↓
+Select Subject
+  ↓
+Select Topic
+  ↓
+Select Santhali
+  ↓
+Choose Feature
+ ├── Live Translation
+ ├── Lesson
+ ├── Worksheet
+ ├── Flashcards
+ └── Assessment</pre>
+            <figcaption>One context at the top, five ways to use it</figcaption>
+          </figure>
+        </section>
+
+        <!-- 08 -->
+        <section class="doc-section" id="live-flow">
+          <header class="sec-head">
+            <span class="sec-num">08</span>
+            <div>
+              <span class="eyebrow">LIVE CLASS</span>
+              <h2 class="squiggle">One exchange, end to end</h2>
+            </div>
+          </header>
+          <p>
+            What actually happens between a teacher asking a question and getting an
+            answer they understand.
+          </p>
+          <figure class="flow">
+            <pre class="flow-block">Teacher Dashboard
+       ↓
+Live Classroom
+       ↓
+Teacher speaks Hindi
+       ↓
+ASR
+       ↓
+Translation
+       ↓
+Pedagogical AI
+       ↓
+TTS
+       ↓
+Student hears Santhali
+       ↓
+Student responds in Santhali
+       ↓
+ASR
+       ↓
+Santhali → Hindi
+       ↓
+Teacher receives response</pre>
+            <figcaption>Both halves run in one sitting, no pause for the class</figcaption>
+          </figure>
+        </section>
+
+        <!-- 09 -->
+        <section class="doc-section" id="content-flow">
+          <header class="sec-head">
+            <span class="sec-num">09</span>
+            <div>
+              <span class="eyebrow">CONTENT FLOW</span>
+              <h2 class="squiggle">Making the worksheet</h2>
+            </div>
+          </header>
+          <p>
+            The same pipeline, pointed at material instead of speech. Worksheets,
+            flashcards, activities and assessment questions come out of it, and they
+            don't reach students until the teacher has read them.
+          </p>
+          <figure class="flow">
+            <pre class="flow-block">Select Grade
+      ↓
+Select Subject
+      ↓
+Select Topic
+      ↓
+Select Learning Objective
+      ↓
+Pedagogical AI
+      ↓
+Generate Content
+      ↓
+Hindi + Santhali
+      ↓
+Teacher Review
+      ↓
+Use in Classroom</pre>
+            <figcaption>The review step is not optional</figcaption>
+          </figure>
+        </section>
+
+        <!-- 10 -->
+        <section class="doc-section" id="architecture">
+          <header class="sec-head">
+            <span class="sec-num">10</span>
+            <div>
+              <span class="eyebrow">ARCHITECTURE</span>
+              <h2 class="squiggle">The shape of the system</h2>
+            </div>
+          </header>
+          <p>
+            The heavy lifting stays on the device. The cloud exists for sync, updates
+            and central records, never as something the classroom depends on mid-lesson.
+          </p>
+          <figure class="flow">
+            <pre class="flow-block">Teacher
+   ↓
+VoiceMate Mobile App
+   ↓
+AI Engine
+ ┌───────────────┐
+ │ ASR           │
+ │ Translation   │
+ │ Pedagogical AI│
+ │ TTS           │
+ └───────────────┘
+   ↓
+Student
+
+       ↕
+ Local SQLite
+       ↕
+ Cloud Sync
+       ↕
+ PostgreSQL / Cloud</pre>
+            <figcaption>Device first, cloud second</figcaption>
+          </figure>
+        </section>
+
+        <!-- 11 -->
+        <section class="doc-section" id="benefits">
+          <header class="sec-head">
+            <span class="sec-num">11</span>
+            <div>
+              <span class="eyebrow">PAYOFF</span>
+              <h2 class="squiggle">What this buys the classroom</h2>
+            </div>
+          </header>
+
+          <ul class="win-list">
+            <li>
+              <strong>Learning in the mother tongue</strong>
+              Students understand the idea first and the language never gets in the way.
+            </li>
+            <li>
+              <strong>Hindi-medium teachers can teach</strong>
+              No retraining, no learning Santhali before being useful.
+            </li>
+            <li>
+              <strong>Real two-way conversation</strong>
+              Questions go out in Santhali and answers come back in Hindi.
+            </li>
+            <li>
+              <strong>Content that fits the class</strong>
+              Same topic, pitched at whatever grade and objective was chosen.
+            </li>
+            <li>
+              <strong>It survives no signal</strong>
+              The lesson doesn't stop because the tower is down.
+            </li>
+            <li>
+              <strong>Printable bilingual material</strong>
+              Lessons, worksheets and flashcards in Hindi and Santhali together.
+            </li>
+            <li>
+              <strong>Room to grow</strong>
+              The same architecture can carry Ho, Mundari and whatever comes next.
+            </li>
+          </ul>
+        </section>
+
+        <!-- 12 -->
+        <section class="doc-section" id="impact">
+          <header class="sec-head">
+            <span class="sec-num">12</span>
+            <div>
+              <span class="eyebrow">IMPACT</span>
+              <h2 class="squiggle">Where we expect to land</h2>
+            </div>
+          </header>
+          <p>
+            The point is to shrink the gap between teacher and student in schools where
+            mother-tongue teaching usually dies on logistics. Santhali is the first
+            language because that's the problem statement we were given, but nothing in
+            the design is specific to it.
+          </p>
+
+          <div class="impact-panel">
+            <h3>Translation was never the product</h3>
+            <p>
+              Plenty of tools translate a sentence. What a classroom needs is the
+              translation wrapped in <strong>the right difficulty level, offline
+              behaviour, material you can hand out, and a teacher who signs off</strong>
+              before anything is said out loud.
+            </p>
+            <p>
+              That combination is what we're building. Santhali first, and the rest of
+              the tribal languages after.
+            </p>
+          </div>
+
+          <div class="note">
+            <strong>Honest about where it stands</strong>
+            <p>
+              Right now this is a working prototype of the flows, not a deployed
+              classroom product. The phrasebook is small and hand-checked, the AI models
+              are stubs waiting for real ones, and every piece of generated content needs
+              a native Santhali educator to review it before students see it.
+            </p>
+          </div>
+        </section>
+
+        <footer class="docs-footer">
+          <span>VoiceMate · Hindi ↔ Santhali classroom assistant · v1.0</span>
+          <nav>
+            <a href="#overview">Back to top</a>
+            <a href="../">Open the app</a>
+            <a href="../README.md">README</a>
+          </nav>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        var links = Array.prototype.slice.call(document.querySelectorAll(".toc-link"));
+        var sections = links
+          .map(function (link) { return document.querySelector(link.getAttribute("href")); })
+          .filter(Boolean);
+        if (!("IntersectionObserver" in window) || !sections.length) return;
+
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            links.forEach(function (link) {
+              link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id);
+            });
+          });
+        }, { rootMargin: "-15% 0px -70% 0px", threshold: 0 });
+
+        sections.forEach(function (section) { observer.observe(section); });
+      })();
+    </script>
+  </body>
+</html>
